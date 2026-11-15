@@ -50,6 +50,23 @@ async function notify(text) {
   }
 }
 
+if (process.env.SIMULATE === "1") {
+  // Simulierter Restock über den echten Weg (GitHub-Secrets, Telegram). Kein Zustand wird verändert.
+  const fake = [
+    {
+      productId: CFG.productId,
+      productPrice: { current: { value: CFG.expectedPrice } },
+      isInStock: true,
+      variants: [{ id: CFG.variantId, isInStock: true, isRestockingSoon: false }],
+    },
+  ];
+  const { messages } = evaluate(parseStock(fake), { ...initialState(), lastHeartbeatAt: Date.now() }, Date.now(), CFG);
+  let ok = messages.length > 0;
+  for (const m of messages) ok = (await notify(`[TEST, kein echter Restock] ${m.text}`)) && ok;
+  console.log(ok ? `Simulation gesendet (${messages.map((m) => m.kind).join(",")}).` : "Simulation FEHLGESCHLAGEN.");
+  process.exit(ok ? 0 : 1);
+}
+
 let prev;
 try {
   prev = JSON.parse(await readFile(STATE_FILE, "utf8"));

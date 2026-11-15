@@ -3,7 +3,12 @@ name: ASOS Adventskalender Wächter
 on:
   schedule:
     - cron: "*/5 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: "Testalarm senden (simulierter Restock, kein echter)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,6 +29,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SIMULATE: ${{ inputs.simulate && '1' || '0' }}
         run: node scripts/watch-once.mjs
 
       - name: Zustand sichern (nur bei Änderung)
