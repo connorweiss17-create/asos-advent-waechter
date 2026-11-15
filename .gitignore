@@ -1,0 +1,6 @@
+.env
+.watch-state.json
+node_modules/
+.wrangler/
+worker/wrangler.toml
+tmp-state.json

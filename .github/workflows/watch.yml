@@ -1,0 +1,40 @@
+name: ASOS Adventskalender Wächter
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# Nie zwei Läufe gleichzeitig, damit Zustand und Alarme nicht doppelt entstehen
+concurrency:
+  group: asos-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bestand prüfen
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/watch-once.mjs
+
+      - name: Zustand sichern (nur bei Änderung)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/state.json
+          if git diff --cached --quiet; then
+            echo "Zustand unverändert."
+          else
+            git commit -m "Zustand aktualisiert"
+            git pull --rebase --autostash
+            git push
+          fi

@@ -1,0 +1,15 @@
+{
+  "name": "asos-advent-waechter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "live": "node scripts/live-check.mjs",
+    "watch": "node --env-file=.env scripts/watch-local.mjs",
+    "watch:test": "node --env-file=.env scripts/watch-local.mjs --test",
+    "deploy": "wrangler deploy --config worker/wrangler.toml"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
